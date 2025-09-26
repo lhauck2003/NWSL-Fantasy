@@ -106,3 +106,6 @@ if __name__ == "__main__":
             avg_tackles = float(sum(float(p.get("tackles_summary", 0)) for p in defenders) / len(defenders))
             avg_ball_recoveries = float(sum(float(p.get("ball_recoveries_misc", 0)) for p in defenders) / len(defenders))
             print(f"Avg Clearances (D): {avg_clearances:.2f}, Avg Interceptions (D): {avg_interceptions:.2f}, Avg Tackles (D): {avg_tackles:.2f}, Avg Ball Recoveries (D): {avg_ball_recoveries:.2f}")
+        # get all positions
+        positions = set(p.get("position_misc") for p in data if "position_misc" in p)
+        print(f"Positions found: {positions}")

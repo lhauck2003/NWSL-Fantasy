@@ -1,4 +1,11 @@
+# NWSL_Fantasy_Team.py
+# Levi Hauck
+# 2025
+# Classes and logic for managing NWSL Fantasy Teams and Players
+# connect to database for player data and stats
+
 import json
+from NWSL_Fantasy_Logic import calculate_fantasy_points 
 
 class NWSL_Fantasy_Team:
     def __init__(self, team_name: str, budget:float=100.00):
@@ -31,6 +38,7 @@ class NWSL_Fantasy_Team:
     def calculate_total_points(self):
         self.total_points = sum(player.get('total_points', 0) for player in self.players)
         return self.total_points
+
     
 class Player:
     def __init__(self, name: str, position: str, cost: float):
@@ -44,3 +52,22 @@ class Player:
     def update_points(self, week, points):
         self.weekly_points[week] = points
         self.total_points += points
+
+## Utility function to load players from a JSON file ##
+def load_players_from_json(file_path: str):
+    with open(file_path, 'r') as f:
+        players_data = json.load(f)
+    
+    players = []
+    for pdata in players_data:
+        player = Player(
+            name=pdata['name'],
+            position=pdata['position'],
+            cost=pdata['cost']
+        )
+        player.id = pdata['id']
+        player.total_points = pdata.get('total_points', 0)
+        player.weekly_points = pdata.get('weekly_points', {})
+        players.append(player)
+    
+    return players
