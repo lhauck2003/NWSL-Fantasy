@@ -7,10 +7,42 @@ cursor = conn.cursor()
 # Player Table (Player ID, Name, Team ID, Position, etc.)
 player_table_sql = """
 CREATE TABLE IF NOT EXISTS players (
-    player_id TEXT PRIMARY KEY,
-    name TEXT,
+player TEXT,
     team_id TEXT,
-    position TEXT
+    team_name TEXT,
+    shirtnumber INT,
+    nationality TEXT,
+    position position_enum,
+    age INT,
+    toal_minutes INT,
+    total_goals INT,
+    total_assists INT,
+    total_pens_made INT,
+    total_pens_att INT,
+    total_shots INT,
+    total_shots_on_target INT,
+    total_cards_yellow INT,
+    total_cards_red INT,
+    total_touches INT,
+    total_tackles INT, 
+    total_interceptions INT,
+    total_blocks INT,
+    total_xg FLOAT,
+    total_npxg FLOAT,
+    total_xg_assist FLOAT,
+    total_sca INT,
+    total_gca INT,
+    total_passes_completed INT,
+    total_passes INT,
+    passes_pct FLOAT,
+    total_progressive_passes INT,
+    total_carries INT,
+    total_progressive_carries INT,
+    total_take_ons INT,
+    total_take_ons_won INT,
+    player_id TEXT
+    PRIMARY KEY (player_id),
+    FOREIGN KEY (player_id) REFERENCES players(player_id)
 );
 """
 
@@ -18,11 +50,12 @@ CREATE TABLE IF NOT EXISTS players (
 team_table_sql = """
 CREATE TABLE IF NOT EXISTS teams (
     team_id TEXT PRIMARY KEY,
-    team_name TEXT
+    team_name TEXT,
+    team_location TEXT
 );
 """
 
-# Player - Team Association Table
+# Player - Team Association Table - not sure if needed?
 player_team_table_sql = """
 CREATE TABLE IF NOT EXISTS player_team (
     player_id TEXT,
@@ -49,23 +82,45 @@ CREATE TABLE IF NOT EXISTS matches (
 
 # Player Match Stats Table (Match ID, Player ID, stats..., match points)
 player_match_stats_table_sql = """
+CREATE TYPE position_enum AS ENUM ('F', 'M', 'D', 'G');
+
 CREATE TABLE IF NOT EXISTS player_match_stats (
-    match_id TEXT,
-    player_id TEXT,
-    minutes INTEGER,
-    goals INTEGER,
-    assists INTEGER,
-    shots INTEGER,
-    shots_on_target INTEGER,
-    yellow_cards INTEGER,
-    red_cards INTEGER,
-    fouls_committed INTEGER,
-    fouls_suffered INTEGER,
-    saves INTEGER,
-    clean_sheet INTEGER,
-    match_points INTEGER,
-    PRIMARY KEY (match_id, player_id),
-    FOREIGN KEY (match_id) REFERENCES matches(match_id),
+    player TEXT,
+    team_id TEXT,
+    team_name TEXT,
+    match_date DATE,
+    shirtnumber INT,
+    nationality TEXT,
+    position position_enum,
+    age INT,
+    minutes INT,
+    goals INT,
+    assists INT,
+    pens_made INT,
+    pens_att INT,
+    shots INT,
+    shots_on_target INT,
+    cards_yellow INT,
+    cards_red INT,
+    touches INT,
+    tackles INT, 
+    interceptions INT,
+    blocks INT,
+    xg FLOAT,
+    npxg FLOAT,
+    xg_assist FLOAT,
+    sca INT,
+    gca INT,
+    passes_completed INT,
+    passes INT,
+    passes_pct FLOAT,
+    progressive_passes INT,
+    carries INT,
+    progressive_carries INT,
+    take_ons INT,
+    take_ons_won INT,
+    player_id TEXT
+    PRIMARY KEY (match_date, player_id),
     FOREIGN KEY (player_id) REFERENCES players(player_id)
 );  
 """

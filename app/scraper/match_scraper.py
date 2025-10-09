@@ -10,10 +10,10 @@ URL = "https://fbref.com/en/comps/182/schedule/NWSL-Scores-and-Fixtures"
 
 BASE_URL = "https://fbref.com"
 
-CSV = "~/NWSL-Fantasy/app/data/player_match_stats.csv"
-CSV_test = "nwsl_2025_matches_test.csv"
+CSV = "~/Documents/NWSL_fantasy/NWSL-Fantasy/app/db/data/player_match_stats.csv"
+CSV_test = "~/Documents/NWSL_fantasy/NWSL-Fantasy/app/db/data/nwsl_2025_matches_test.csv"
 
-LINKS_CSV = "match_links.csv"
+LINKS_CSV = "~/Documents/NWSL_fantasy/NWSL-Fantasy/app/db/data/match_links.csv"
 
 HEAEDERS = {
     "User-Agent": (
@@ -31,9 +31,23 @@ HEAEDERS = {
 }
 
 
-MAP = {
-    "stat_name":"new_stat_name"
+POSITIONS = {
+    "FW":"F",
+    "LW":"F",
+    "RW":"F",
+    "AM":"M",
+    "RM":"M",
+    "LM":"M",
+    "CM":"M",
+    "DM":"M",
+    "RB":"D",
+    "LB":"D",
+    "CB":"D",
+    "FB":"D",
+    "WB":"D",
+    "GK":"G"
 }
+
 
 MONTHS = {
     "January": "01",
@@ -51,7 +65,7 @@ MONTHS = {
 }
 
 def polite_delay():
-    time.sleep(random.uniform(1.0, 2.5))
+    time.sleep(random.uniform(0.5, 1.5))
 
 def make_player_id(team_id, shirt_num):
     return f"{team_id}_{shirt_num}"
@@ -59,8 +73,8 @@ def make_player_id(team_id, shirt_num):
 def scrape_matches():
     urls = get_match_urls()
     print(f"Found {len(urls)} new match URLs to scrape.")
-    for url in urls: 
-        scrape_match_to_csv(url, CSV)
+    for url in urls[:]: # set to 2 for testing, remove for actual running
+        scrape_match_to_csv(url, CSV) # change the CSV file for actual running
         polite_delay()
 
 def scrape_match_to_csv(url, csv_file):
@@ -85,13 +99,14 @@ def scrape_match_to_csv(url, csv_file):
 
     # scrape data into csvc
     df = pd.DataFrame(all_player_stats)
-    df.rename(columns=MAP, inplace=True)
     df.to_csv(csv_file, mode='a', header=not pd.io.common.file_exists(csv_file), index=False)
 
     # print(player_stat_table[0:5])
 
 def scrape_player_stats(table, match_url):
     all_stats = []
+    team_name = table.find("caption").get_text(strip=True)
+    team_name = team_name.split(" Player Stats Table")[0]
     rows = table.find("tbody").find_all("tr", recursive=False)
     team_id = table.get("id", "None")
     team_id = team_id.replace("switcher_player_stats_", "")
@@ -104,11 +119,17 @@ def scrape_player_stats(table, match_url):
         player_name = player_link.text.strip()
         player_url = BASE_URL + player_link.a["href"] if player_link.a else None
 
-        stats = {"player": player_name, "team_id": team_id, "match_date": MONTHS[match_url.split("/")[-1].split("-")[-4]] + match_url.split("/")[-1].split("-")[-3] + match_url.split("/")[-1].split("-")[-2]}
+        # correct team names
+        if(team_name=='Louisville'):
+            team_name = "Racing"
+
+        stats = {"player": player_name, "team_id": team_id, "team_name": team_name, "match_date": MONTHS[match_url.split("/")[-1].split("-")[-4]] + match_url.split("/")[-1].split("-")[-3] + match_url.split("/")[-1].split("-")[-2]}
         for td in row.find_all("td"):
             col = td.get("data-stat")
             val = td.text.strip()
             stats[col] = val
+        
+        stats["position"] = POSITIONS[stats["position"].split(",")[0]]
         stats["player_id"] = make_player_id(team_id, stats.get("shirtnumber", "unknown"))
         all_stats.append(stats)
     return all_stats
