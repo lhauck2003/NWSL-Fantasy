@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from app.db.database import engine
-from app.db import models
+from app.db import catalog
 from app.routers import players, matches, fantasy, users
 
 # Create tables if not using Alembic yet
-models.Base.metadata.create_all(bind=engine)
+catalog.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NWSL Fantasy API")
 
